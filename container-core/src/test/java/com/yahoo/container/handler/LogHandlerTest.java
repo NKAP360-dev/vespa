@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class LogHandlerTest {
@@ -43,9 +43,13 @@ public class LogHandlerTest {
     }
 
     class MockLogReader extends LogReader {
+        MockLogReader() {
+            super("", "");
+        }
+
         @Override
-        protected JSONObject readLogs(String logDirectory, long earliestLogThreshold, long latestLogThreshold) throws JSONException {
-            if(latestLogThreshold > 1000) {
+        protected JSONObject readLogs(long earliestLogThreshold, long latestLogThreshold) throws JSONException {
+            if (latestLogThreshold > 1000) {
                 return new JSONObject("{\"one\":\"newer_log\"}");
             } else {
                 return new JSONObject("{\"two\":\"older_log\"}");

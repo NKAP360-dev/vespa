@@ -2,6 +2,7 @@
 package com.yahoo.container.handler;
 
 import com.google.inject.Inject;
+import com.yahoo.container.core.LogserverConfig;
 import com.yahoo.container.jdisc.HttpRequest;
 import com.yahoo.container.jdisc.HttpResponse;
 import com.yahoo.container.jdisc.ThreadedHttpRequestHandler;
@@ -17,15 +18,14 @@ import java.util.concurrent.Executor;
 
 public class LogHandler extends ThreadedHttpRequestHandler {
 
-    private static final String LOG_DIRECTORY = "/home/y/logs/vespa/logarchive/";
     private final LogReader logReader;
 
     @Inject
-    public LogHandler(Executor executor) {
-        this(executor, new LogReader());
+    public LogHandler(Executor executor, LogserverConfig config) {
+        this(executor, new LogReader(config.logDirectory(), config.logPattern()));
     }
 
-    protected LogHandler(Executor executor, LogReader logReader) {
+    LogHandler(Executor executor, LogReader logReader) {
         super(executor);
         this.logReader = logReader;
     }
@@ -38,7 +38,7 @@ public class LogHandler extends ThreadedHttpRequestHandler {
         long earliestLogThreshold = getEarliestThreshold(apiParams);
         long latestLogThreshold = getLatestThreshold(apiParams);
         try {
-            JSONObject logJson = logReader.readLogs(LOG_DIRECTORY, earliestLogThreshold, latestLogThreshold);
+            JSONObject logJson = logReader.readLogs(earliestLogThreshold, latestLogThreshold);
             responseJSON.put("logs", logJson);
         } catch (IOException | JSONException e) {
             return new HttpResponse(404) {
